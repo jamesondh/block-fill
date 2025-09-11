@@ -20,7 +20,8 @@ export default function PlayPage() {
     redo,
     reset,
     setParams,
-    params
+    params,
+    loadFromStorage
   } = useGameStore();
   
   const { loadFromHash } = useHashRouter();
@@ -32,14 +33,20 @@ export default function PlayPage() {
     const hashParams = loadFromHash();
     
     if (!hashParams || !hashParams.seed) {
-      const defaultParams = getDefaultParams(1, 'medium');
-      defaultParams.seed = generateSeed();
-      setParams(defaultParams);
-      generateLevel(defaultParams);
+      // Try to load from storage first
+      loadFromStorage();
+      
+      // If no stored game, generate new one
+      if (!level) {
+        const defaultParams = getDefaultParams(1, 'medium');
+        defaultParams.seed = generateSeed();
+        setParams(defaultParams);
+        generateLevel(defaultParams);
+      }
     } else {
       generateLevel(hashParams);
     }
-  }, [generateLevel, loadFromHash, setParams]);
+  }, []);
 
   const handleNewGame = () => {
     const newParams = getDefaultParams(params.m || 1, params.diff || 'medium');

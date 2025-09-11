@@ -84,7 +84,10 @@ export function BoardSVG({
           strokeWidth={strokeWidth}
           rx={4}
           ry={4}
-          style={{ cursor: 'pointer' }}
+          style={{ 
+            cursor: 'pointer',
+            transition: 'fill 200ms ease-in-out, stroke 200ms ease-in-out'
+          }}
           onMouseDown={() => onCellMouseDown(index)}
           onMouseEnter={() => onCellMouseEnter(index)}
         />
@@ -135,6 +138,11 @@ export function BoardSVG({
         strokeLinejoin="round"
         opacity={0.8}
         pointerEvents="none"
+        style={{
+          strokeDasharray: path.length * 100,
+          strokeDashoffset: path.length * 100,
+          animation: `drawPath 300ms ease-in-out forwards`
+        }}
       />
     );
   }, [getCellCenter, pathWidth]);

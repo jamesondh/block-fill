@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Level, GameParams, DifficultyTier } from '@/types';
+import { saveGameState, loadGameState, clearGameState } from '@/lib/storage';
 
 interface HistoryEntry {
   playerPaths: Map<number, number[]>;
@@ -32,6 +33,9 @@ interface GameStore {
   setParams: (params: Partial<GameParams>) => void;
   setIsGenerating: (generating: boolean) => void;
   setError: (error: string | null) => void;
+  loadFromStorage: () => void;
+  saveToStorage: () => void;
+  clearStorage: () => void;
 }
 
 const MAX_HISTORY_SIZE = 50;
@@ -53,15 +57,22 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isGenerating: false,
   error: null,
   
-  setLevel: (level) => set({ 
-    level, 
-    playerPaths: new Map(),
-    history: [],
-    historyIndex: -1,
-    error: null 
-  }),
+  setLevel: (level) => {
+    set({ 
+      level, 
+      playerPaths: new Map(),
+      history: [],
+      historyIndex: -1,
+      error: null 
+    });
+    saveGameState({ level, playerPaths: new Map(), currentColor: 0 });
+  },
   
-  setPlayerPaths: (paths) => set({ playerPaths: paths }),
+  setPlayerPaths: (paths) => {
+    set({ playerPaths: paths });
+    const { level, currentColor } = get();
+    saveGameState({ level, playerPaths: paths, currentColor });
+  },
   
   setCurrentColor: (color) => set({ currentColor: color }),
   
@@ -168,5 +179,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
   
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   
-  setError: (error) => set({ error })
+  setError: (error) => set({ error }),
+  
+  loadFromStorage: () => {
+    const stored = loadGameState();
+    if (stored) {
+      set({
+        level: stored.level || null,
+        playerPaths: stored.playerPaths || new Map(),
+        currentColor: stored.currentColor || 0,
+        history: [],
+        historyIndex: -1
+      });
+    }
+  },
+  
+  saveToStorage: () => {
+    const { level, playerPaths, currentColor } = get();
+    saveGameState({ level, playerPaths, currentColor });
+  },
+  
+  clearStorage: () => {
+    clearGameState();
+    set({ 
+      playerPaths: new Map(),
+      currentColor: 0,
+      history: [],
+      historyIndex: -1
+    });
+  }
 }));
