@@ -1,19 +1,17 @@
 export class PRNG {
   private seed: number;
-  private next: () => number;
+  private a: number;
 
   constructor(seed: string | number) {
     this.seed = typeof seed === 'string' ? this.hashString(seed) : seed;
-    this.next = this.mulberry32(this.seed);
+    this.a = this.seed;
   }
 
-  private mulberry32(a: number): () => number {
-    return function() {
-      let t = a += 0x6D2B79F5;
-      t = Math.imul(t ^ t >>> 15, t | 1);
-      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-      return ((t ^ t >>> 14) >>> 0) / 4294967296;
-    };
+  private mulberry32(): number {
+    let t = this.a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
   }
 
   private hashString(str: string): number {
@@ -27,7 +25,7 @@ export class PRNG {
   }
 
   random(): number {
-    return this.next();
+    return this.mulberry32();
   }
 
   randInt(min: number, max: number): number {

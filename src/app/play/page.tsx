@@ -30,20 +30,25 @@ export default function PlayPage() {
   const { generateLevel } = useWorker();
 
   useEffect(() => {
+    console.log('PlayPage useEffect - Starting initialization');
     const hashParams = loadFromHash();
+    console.log('Hash params:', hashParams);
     
     if (!hashParams || !hashParams.seed) {
       // Try to load from storage first
       loadFromStorage();
+      console.log('Loaded from storage, level exists:', !!level);
       
       // If no stored game, generate new one
       if (!level) {
         const defaultParams = getDefaultParams(1, 'medium');
         defaultParams.seed = generateSeed();
+        console.log('Generating new level with params:', defaultParams);
         setParams(defaultParams);
         generateLevel(defaultParams);
       }
     } else {
+      console.log('Generating level from hash params:', hashParams);
       generateLevel(hashParams);
     }
   }, []);

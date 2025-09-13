@@ -184,3 +184,20 @@ This project is part of a puzzle game implementation based on the Block Fill spe
 
 ## 🤝 Contributing
 Contributions are welcome! Please review `SPEC.md` for the full technical specification before making changes.
+## 🔬 Technical Implementation Details
+
+### Web Worker Setup
+The game uses Web Workers for CPU-intensive level generation to prevent UI blocking. Due to Next.js Turbopack limitations with Web Worker imports, we use a custom worker factory (`/src/lib/worker-factory.ts`) that:
+- Creates workers from Blob URLs instead of file imports
+- Bundles all generation logic in a single file
+- Handles message passing between main thread and worker
+
+### Hamiltonian Path Generation
+The Hamiltonian path algorithm uses a combination of strategies:
+1. **Strip-and-stitch**: Fast algorithm for simple regions
+2. **DFS with recursion limit**: Fallback for complex regions with a 10,000 call limit to prevent hangs
+
+**Expected behavior**: During level generation, you may see console messages like "dfs: Max calls exceeded, aborting" - this is normal. The algorithm tries multiple starting positions, and if one path search becomes too complex, it aborts and tries another approach. This ensures the game doesn't hang on computationally expensive puzzles.
+
+### Debugging
+For debugging worker issues, use the test page at `/test` which provides direct worker communication testing without the full game UI.
