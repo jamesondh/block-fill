@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { createGenerationWorker } from '@/lib/worker-factory';
+import type { Level } from '@/types';
 
 export default function TestPage() {
   const [status, setStatus] = useState('Initializing...');
-  const [levelData, setLevelData] = useState<any>(null);
+  const [levelData, setLevelData] = useState<Level | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

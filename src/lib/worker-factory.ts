@@ -1,4 +1,4 @@
-import { WorkerMessage, WorkerResponse } from '@/types';
+import { WorkerResponse } from '@/types';
 
 // This module creates a Web Worker from an inline string to work with Turbopack
 // The worker code is defined as a string and converted to a Blob URL at runtime
@@ -645,14 +645,14 @@ export function createGenerationWorker(): Worker {
   const worker = new Worker(workerUrl);
   
   // Store the URL so it can be revoked later
-  (worker as any).__blobUrl = workerUrl;
+  (worker as Worker & { __blobUrl?: string }).__blobUrl = workerUrl;
   
   return worker;
 }
 
 export function terminateWorker(worker: Worker): void {
   // Revoke the blob URL if it exists
-  const blobUrl = (worker as any).__blobUrl;
+  const blobUrl = (worker as Worker & { __blobUrl?: string }).__blobUrl;
   if (blobUrl) {
     URL.revokeObjectURL(blobUrl);
   }

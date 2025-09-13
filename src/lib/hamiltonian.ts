@@ -30,7 +30,8 @@ export function generateHamiltonianPath(
 /**
  * Strip-and-stitch algorithm for Hamiltonian path generation
  */
-function stripAndStitch(region: IRRegion, prng: PRNG): HamiltonianPath {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function stripAndStitch(region: IRRegion, _prng: PRNG): HamiltonianPath {
   const cells = Array.from(region.cells).map(c => {
     const [x, y] = c.split(',').map(Number);
     return [x - region.bounds.minX, y - region.bounds.minY] as [number, number];
@@ -69,7 +70,7 @@ function stripAndStitch(region: IRRegion, prng: PRNG): HamiltonianPath {
   // Sort strips by y-coordinate
   const sortedStrips = Array.from(strips.entries())
     .sort((a, b) => a[0] - b[0])
-    .map(([_, strip]) => {
+    .map(([, strip]) => {
       // Sort cells in each strip by x-coordinate
       return strip.sort((a, b) => a[0] - b[0]);
     });

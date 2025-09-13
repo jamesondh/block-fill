@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Level, GameParams, DifficultyTier } from '@/types';
 import { saveGameState, loadGameState, clearGameState } from '@/lib/storage';
+import { areNeighbors, interpolatePath } from '@/lib/pathUtils';
 
 interface HistoryEntry {
   playerPaths: Map<number, number[]>;
@@ -89,12 +90,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
   
   updateDrag: (cellIndex) => {
-    const { isDragging, dragPath, currentColor, playerPaths } = get();
-    if (!isDragging) return;
+    const { isDragging, dragPath, currentColor, playerPaths, level } = get();
+    if (!isDragging || !level) return;
     
     const lastCell = dragPath[dragPath.length - 1];
     if (lastCell === cellIndex) return;
     
+    // Check if the cell is open/valid
+    if (level.open[cellIndex] !== 1) return;
+    
+    // Handle backtracking - if the cell is already in the path
     if (dragPath.includes(cellIndex)) {
       const index = dragPath.indexOf(cellIndex);
       const newPath = dragPath.slice(0, index + 1);
@@ -102,12 +107,37 @@ export const useGameStore = create<GameStore>((set, get) => ({
         dragPath: newPath,
         playerPaths: new Map(playerPaths).set(currentColor, newPath)
       });
-    } else {
+      return;
+    }
+    
+    // Check if cells are neighbors (4-directional)
+    if (areNeighbors(lastCell, cellIndex, level.w)) {
+      // Direct neighbor - just add it
       const newPath = [...dragPath, cellIndex];
       set({ 
         dragPath: newPath,
         playerPaths: new Map(playerPaths).set(currentColor, newPath)
       });
+    } else {
+      // Not a direct neighbor - interpolate the path
+      const interpolated = interpolatePath(
+        lastCell,
+        cellIndex,
+        level.w,
+        level.h,
+        level.open,
+        dragPath
+      );
+      
+      if (interpolated && interpolated.length > 0) {
+        // Successfully found a path - add all intermediate cells
+        const newPath = [...dragPath, ...interpolated];
+        set({ 
+          dragPath: newPath,
+          playerPaths: new Map(playerPaths).set(currentColor, newPath)
+        });
+      }
+      // If no valid path found, ignore the input
     }
   },
   

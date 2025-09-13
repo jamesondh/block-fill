@@ -26,7 +26,7 @@ export default function PlayPage() {
   
   const { loadFromHash } = useHashRouter();
   const { handleCellMouseDown, handleCellMouseEnter, handleCellMouseUp } = useInput();
-  const { isValid, hasWon, coverage } = useValidator();
+  const { hasWon, coverage } = useValidator();
   const { generateLevel } = useWorker();
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function PlayPage() {
       console.log('Generating level from hash params:', hashParams);
       generateLevel(hashParams);
     }
-  }, []);
+  }, [generateLevel, level, loadFromHash, loadFromStorage, setParams]);
 
   const handleNewGame = () => {
     const newParams = getDefaultParams(params.m || 1, params.diff || 'medium');
@@ -94,7 +94,7 @@ export default function PlayPage() {
             Seed: {params.seed}
           </p>
           <p className="text-sm mt-2">
-            Coverage: {coverage}% | Valid: {isValid ? '✓' : '✗'}
+            Coverage: {coverage}%
             {hasWon && <span className="ml-2 text-green-600 font-bold">You Win!</span>}
           </p>
         </div>
